@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <!-- exe 文件图标（资源管理器/任务栏） -->
+    <ApplicationIcon>Assets\app-icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Avalonia 内嵌资源：Window.Icon 与托盘 TrayIcon 引用 -->
+    <AvaloniaResource Include="Assets\app-icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.2.5" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.2.5" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.5" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <!-- 进程内 DI 容器：ServiceCollection/AddApplication/AddInfrastructure 用的扩展与 BuildServiceProvider 实现 -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+    <!-- 日志：AddLogging 与 ILogger<T> 的具体实现/扩展（管线行为、领域事件订阅者依赖 ILogger<T>） -->
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.12" />
+    <!-- 控制台日志输出：双击 exe 时日志直接显示在随程序打开的 cmd 窗口 -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.12" />
+    <!-- 配置：appsettings.json 读取（FunASR 地址/自启等基础设施配置） -->
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.12" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BaiZe.Application\BaiZe.Application.csproj" />
+    <ProjectReference Include="..\BaiZe.Infrastructure\BaiZe.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

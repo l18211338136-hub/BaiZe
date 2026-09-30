@@ -1,0 +1,300 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:BaiZe.Desktop.ViewModels"
+             x:Class="BaiZe.Desktop.Views.MeetingView"
+             x:DataType="vm:MeetingViewModel">
+  <Grid RowDefinitions="Auto,*,Auto">
+    <!-- ============ 状态头 ============ -->
+    <Border Grid.Row="0" Background="White" BorderBrush="#E8E8E4" BorderThickness="0,0,0,0.5"
+            Padding="18,13" BoxShadow="0 1 3 0 #0D000000">
+      <!-- 第 0 列固定宽度预留"录制中"胶囊位置：会议结束时标题不发生水平跳动 -->
+      <!-- MinHeight 预留胶囊高度：胶囊出现时头部总高度不变 -->
+      <Grid ColumnDefinitions="74,Auto,Auto,*,Auto" MinHeight="30">
+        <Border Grid.Column="0" Background="#FCEBEB" CornerRadius="999" Padding="11,4"
+                IsVisible="{Binding IsRecording}" VerticalAlignment="Center">
+          <StackPanel Orientation="Horizontal" Spacing="7">
+            <Ellipse Width="8" Height="8" Fill="#D64545" Classes="recPulse"/>
+            <TextBlock Text="录制中" FontSize="12" Foreground="#A32D2D" FontWeight="SemiBold"/>
+          </StackPanel>
+        </Border>
+        <TextBlock Grid.Column="1" Text="{Binding Title}" FontSize="15" FontWeight="SemiBold"
+                   Foreground="#2A2A26" VerticalAlignment="Center" Margin="14,0,0,0"
+                   IsVisible="{Binding HasMeeting}"/>
+        <Border Grid.Column="2" Background="#F4F3EC" CornerRadius="6" Padding="8,2"
+                VerticalAlignment="Center" Margin="12,0,0,0">
+          <TextBlock Text="{Binding ElapsedText}" FontFamily="Consolas" FontSize="12.5"
+                     Foreground="#0C5D49" FontWeight="SemiBold"/>
+        </Border>
+        <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+          <TextBlock Text="会议号" FontSize="11.5" Foreground="#9A988E"/>
+          <TextBlock Text="{Binding MeetingIdText}" FontSize="12" Foreground="#6B6A62"
+                     FontFamily="Consolas"/>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- ============ 中部：转写流 + 右侧面板 ============ -->
+    <Grid Grid.Row="1" ColumnDefinitions="*,224">
+      <Panel Grid.Column="0">
+        <!-- 空态引导卡 -->
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="0"
+                    IsVisible="{Binding !HasMeeting}">
+          <Border Width="76" Height="76" CornerRadius="38" HorizontalAlignment="Center"
+                  Background="#E5F4EE" Margin="0,0,0,18">
+            <PathIcon Width="32" Height="32" Foreground="#0F8166"
+                      Data="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3Zm5-6v3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2Z"/>
+          </Border>
+          <TextBlock Text="还没有进行中的会议" FontSize="16" FontWeight="SemiBold"
+                     Foreground="#3A3A34" TextAlignment="Center" Margin="0,0,0,6"/>
+          <TextBlock Text="点击下方「开始会议」创建一场会议&#x0a;转写内容会实时显示在这里"
+                     TextAlignment="Center" Foreground="#9A988E" FontSize="12.5" LineHeight="20"/>
+        </StackPanel>
+
+        <DockPanel Margin="12,10,12,10" IsVisible="{Binding HasMeeting}">
+          <!-- 纪要卡 -->
+          <Border DockPanel.Dock="Bottom" Background="#FFFDF4" CornerRadius="12" Padding="14,11"
+                  Margin="4,8,4,4" MaxHeight="160" IsVisible="{Binding HasSummary}"
+                  BorderBrush="#EFE3B8" BorderThickness="0.5">
+            <StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,0,5">
+                <PathIcon Width="13" Height="13" Foreground="#B08D2E"
+                          Data="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6Zm-2 12H8v-2h4v2Zm4 4H8v-2h8v2Zm-1-9V3.5L18.5 9H15Z"/>
+                <TextBlock Text="会议纪要" FontSize="12" FontWeight="SemiBold" Foreground="#8A6D1F"/>
+              </StackPanel>
+              <ScrollViewer MaxHeight="118">
+                <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" FontSize="13"
+                           Foreground="#4A4A42" LineHeight="20"/>
+              </ScrollViewer>
+            </StackPanel>
+          </Border>
+
+          <!-- 转写流 -->
+          <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding Segments}" Margin="4,4,4,4">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:SegmentVm">
+                  <Grid ColumnDefinitions="Auto,*" Margin="0,3">
+                    <Border Width="32" Height="32" CornerRadius="16"
+                            VerticalAlignment="Top" Margin="0,2,11,0">
+                      <Border.Background>
+                        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                          <GradientStop Color="#DFF1EA" Offset="0"/>
+                          <GradientStop Color="#C4E6D8" Offset="1"/>
+                        </LinearGradientBrush>
+                      </Border.Background>
+                      <TextBlock Text="{Binding Initial}" FontSize="13" FontWeight="SemiBold" Foreground="#0C5D49"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <Border Background="White" CornerRadius="4,14,14,14" Padding="13,9"
+                            BoxShadow="0 1 3 0 #10000000" MaxWidth="520"
+                            HorizontalAlignment="Left">
+                      <StackPanel Spacing="3">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                          <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" Foreground="#0F6E56"/>
+                          <TextBlock Text="{Binding Time}" FontSize="11" Foreground="#B0AEA3" FontFamily="Consolas"
+                                     VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="13.5"
+                                   Foreground="{Binding TextColor}" LineHeight="21"/>
+                      </StackPanel>
+                    </Border>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </DockPanel>
+      </Panel>
+
+      <!-- ============ 右侧面板 ============ -->
+      <Border Grid.Column="1" BorderBrush="#E8E8E4" BorderThickness="0.5,0,0,0" Padding="14,16,14,14">
+        <Grid RowDefinitions="Auto,*,Auto">
+          <StackPanel Grid.Row="0" Spacing="10">
+            <TextBlock Text="参会人" FontSize="11.5" FontWeight="SemiBold" Foreground="#9A988E"/>
+            <Border Background="White" CornerRadius="10" Padding="10,9" BoxShadow="0 1 3 0 #0D000000"
+                    IsVisible="{Binding !HasSpeakers}">
+              <TextBlock Text="会议开始后显示" FontSize="12" Foreground="#B4B2A9"/>
+            </Border>
+            <Border Background="White" CornerRadius="10" Padding="10,9" BoxShadow="0 1 3 0 #0D000000"
+                    IsVisible="{Binding HasSpeakers}">
+              <ItemsControl ItemsSource="{Binding Speakers}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate DataType="vm:SpeakerVm">
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,3">
+                      <Border Width="24" Height="24" CornerRadius="12" Background="#DFF1EA">
+                        <TextBlock Text="{Binding Initial}" FontSize="11" FontWeight="SemiBold" Foreground="#0F6E56"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      </Border>
+                      <TextBlock Text="{Binding Name}" FontSize="12.5" VerticalAlignment="Center"
+                                 Foreground="#3A3A34"/>
+                    </StackPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Border>
+          </StackPanel>
+
+          <StackPanel Grid.Row="1" Spacing="9" VerticalAlignment="Bottom" Margin="0,0,0,14">
+            <Border Background="White" CornerRadius="10" Padding="12,10" BoxShadow="0 1 3 0 #0D000000">
+              <StackPanel>
+                <TextBlock Text="已转写字数" FontSize="11" Foreground="#9A988E" Margin="0,0,0,2"/>
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <TextBlock Text="{Binding WordCount}" FontSize="20" FontWeight="SemiBold"
+                             Foreground="#0C5D49"/>
+                  <TextBlock Text="字" FontSize="11" Foreground="#B0AEA3" VerticalAlignment="Bottom" Margin="0,0,0,3"/>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+            <Border Background="White" CornerRadius="10" Padding="12,10" BoxShadow="0 1 3 0 #0D000000">
+              <StackPanel>
+                <TextBlock Text="转写分段" FontSize="11" Foreground="#9A988E" Margin="0,0,0,2"/>
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <TextBlock Text="{Binding SegmentCount}" FontSize="20" FontWeight="SemiBold"
+                             Foreground="#0C5D49"/>
+                  <TextBlock Text="段" FontSize="11" Foreground="#B0AEA3" VerticalAlignment="Bottom" Margin="0,0,0,3"/>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+
+          <Button Grid.Row="2" Classes="accent" Content="生成纪要" Command="{Binding SummarizeCommand}"
+                  IsEnabled="{Binding HasMeeting}" HorizontalAlignment="Stretch"/>
+        </Grid>
+      </Border>
+    </Grid>
+
+    <!-- ============ 底部控制条 ============ -->
+    <Border Grid.Row="2" Background="White" BorderBrush="#E8E8E4" BorderThickness="0,0.5,0,0"
+            BoxShadow="0 -1 3 0 #0A000000">
+      <!-- 左：麦克风状态 | 中：弹性空白 | 右：开始/结束按钮固定最右 -->
+      <Grid Margin="18,11,18,11" ColumnDefinitions="Auto,*,Auto">
+        <Border Grid.Column="0" Background="#F4F3EC" CornerRadius="999" Padding="12,5"
+                VerticalAlignment="Center">
+          <StackPanel Orientation="Horizontal" Spacing="7">
+            <Ellipse Width="7" Height="7" Fill="#97C459" Classes="recPulse"
+                     IsVisible="{Binding IsMicLive}"/>
+            <Ellipse Width="7" Height="7" Fill="#C9C7BE" IsVisible="{Binding !IsMicLive}"/>
+            <!-- 连接成功后的"已连接"徽标：绿底圆点 + 文字，明确提示识别链路已通 -->
+            <Border Background="#E5F4EE" CornerRadius="999" Padding="9,3"
+                    IsVisible="{Binding IsAsrConnected}" VerticalAlignment="Center">
+              <StackPanel Orientation="Horizontal" Spacing="5">
+                <Ellipse Width="6" Height="6" Fill="#0C9D6B"/>
+                <TextBlock Text="已连接" FontSize="10.5" FontWeight="SemiBold"
+                           Foreground="#0C5D49" VerticalAlignment="Center"/>
+              </StackPanel>
+            </Border>
+            <TextBlock Text="{Binding MicStatus}" FontSize="11.5"
+                       Foreground="#888780" VerticalAlignment="Center"/>
+          </StackPanel>
+        </Border>
+        <!-- 单格 Grid 叠放：两颗按钮常驻同位，用透明度交叉淡入淡出切换（避免 IsVisible 硬切闪动） -->
+        <Grid Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" MinWidth="132">
+          <Button Classes="meetingEnd" Classes.off="{Binding !IsRecording}"
+                  Command="{Binding EndMeetingCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Width="15" Height="15" Foreground="White"
+                        Data="M7.5 7h9c.55 0 1 .45 1 1v8c0 .55-.45 1-1 1h-9c-.55 0-1-.45-1-1V8c0-.55.45-1 1-1Z"/>
+              <TextBlock Text="结束会议" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+          <Button Classes="meetingStart" Classes.off="{Binding IsRecording}"
+                  Command="{Binding StartMeetingCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <PathIcon Width="17" Height="17" Foreground="White"
+                        Data="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3Zm5-6v3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2Z"/>
+              <TextBlock Text="开始会议" VerticalAlignment="Center"/>
+            </StackPanel>
+          </Button>
+        </Grid>
+      </Grid>
+    </Border>
+  </Grid>
+
+  <UserControl.Styles>
+    <!-- 隐藏态：透明 + 不可点击/聚焦。两颗按钮常驻同位，靠 Opacity 交叉淡入淡出切换，
+         避免 IsVisible 硬切引起的布局闪动 -->
+    <Style Selector="Button.off">
+      <Setter Property="Opacity" Value="0"/>
+      <Setter Property="IsHitTestVisible" Value="False"/>
+      <Setter Property="IsTabStop" Value="False"/>
+    </Style>
+
+    <!-- 开始会议：主视觉 CTA——主题青绿渐变胶囊 + 麦克风图标 -->
+    <Style Selector="Button.meetingStart">
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Padding" Value="22,10"/>
+      <Setter Property="MinWidth" Value="132"/>
+      <Setter Property="FontSize" Value="13.5"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+          <GradientStop Color="#1AA184" Offset="0"/>
+          <GradientStop Color="#0B5745" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.15"/>
+          <DoubleTransition Property="Opacity" Duration="0:0:0.12"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Button.meetingStart:pointerover /template/ ContentPresenter">
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+          <GradientStop Color="#23B795" Offset="0"/>
+          <GradientStop Color="#0E6B53" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+    </Style>
+    <Style Selector="Button.meetingStart:pressed /template/ ContentPresenter">
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+          <GradientStop Color="#158C71" Offset="0"/>
+          <GradientStop Color="#094A3B" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+    </Style>
+
+    <!-- 结束会议：红渐变胶囊 + 停止方块，录制时才出现 -->
+    <Style Selector="Button.meetingEnd">
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="Padding" Value="22,10"/>
+      <Setter Property="MinWidth" Value="132"/>
+      <Setter Property="FontSize" Value="13.5"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+          <GradientStop Color="#DE5757" Offset="0"/>
+          <GradientStop Color="#B23A3A" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.15"/>
+          <DoubleTransition Property="Opacity" Duration="0:0:0.12"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Button.meetingEnd:pointerover /template/ ContentPresenter">
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+          <GradientStop Color="#E96A6A" Offset="0"/>
+          <GradientStop Color="#C24343" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+    </Style>
+    <Style Selector="Button.meetingEnd:pressed /template/ ContentPresenter">
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+          <GradientStop Color="#C94B4B" Offset="0"/>
+          <GradientStop Color="#9C3131" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+    </Style>
+  </UserControl.Styles>
+</UserControl>

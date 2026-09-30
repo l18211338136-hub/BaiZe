@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>BaiZe.Mediator</RootNamespace>
+    <AssemblyName>BaiZe.Mediator</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 仅依赖 DI / 日志抽象；运行时由宿主（Desktop / Backend.Http）提供的 DI 容器兑现。 -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+  </ItemGroup>
+
+</Project>

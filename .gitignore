@@ -55,3 +55,9 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# 自定义忽略文件
+[Ss]cratch/
+*.vs/
+*assets-src
+*build.log

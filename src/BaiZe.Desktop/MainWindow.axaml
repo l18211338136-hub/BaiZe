@@ -1,0 +1,236 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:BaiZe.Desktop.ViewModels"
+        xmlns:views="clr-namespace:BaiZe.Desktop.Views"
+        x:Class="BaiZe.Desktop.MainWindow"
+        x:DataType="vm:ShellViewModel"
+        Title="白泽工作助手" Width="1080" Height="720"
+        MinWidth="880" MinHeight="600"
+        Icon="avares://BaiZe.Desktop/Assets/app-icon.ico"
+        Background="#F6F5F1"
+        FontFamily="Microsoft YaHei UI, PingFang SC, Segoe UI"
+        ExtendClientAreaToDecorationsHint="False">
+  <Window.Styles>
+    <!-- ============ 导航按钮：圆角 + 悬停过渡 + 激活态 ============ -->
+    <Style Selector="Button.navBtn">
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="Padding" Value="10,9"/>
+      <Setter Property="CornerRadius" Value="10"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="FontSize" Value="13"/>
+      <Setter Property="Foreground" Value="#5F5E5A"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.15"/>
+          <BrushTransition Property="Foreground" Duration="0:0:0.15"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Button.navBtn:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#F0EEE7"/>
+    </Style>
+    <Style Selector="Button.navBtn.active">
+      <Setter Property="Background" Value="#DFF3EC"/>
+      <Setter Property="Foreground" Value="#085041"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+    </Style>
+    <Style Selector="Button.navBtn.active:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#D2EDE3"/>
+    </Style>
+
+    <!-- ============ 主按钮：青绿渐变 + 悬停/按下反馈 ============ -->
+    <Style Selector="Button.accent">
+      <Setter Property="Foreground" Value="White"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Padding" Value="16,9"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+          <GradientStop Color="#14997A" Offset="0"/>
+          <GradientStop Color="#0C5D49" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+    </Style>
+    <Style Selector="Button.accent:pointerover /template/ ContentPresenter">
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+          <GradientStop Color="#18A886" Offset="0"/>
+          <GradientStop Color="#0E6B55" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+    </Style>
+    <Style Selector="Button.accent:pressed /template/ ContentPresenter">
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+          <GradientStop Color="#0F8166" Offset="0"/>
+          <GradientStop Color="#0A5040" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+    </Style>
+    <Style Selector="Button.accent:disabled /template/ ContentPresenter">
+      <Setter Property="Background" Value="#C9C7BE"/>
+    </Style>
+    <Style Selector="Button.accent:disabled">
+      <Setter Property="Foreground" Value="#F4F3EE"/>
+    </Style>
+    <!-- ⚠️ FluentTheme 新版内置了 Button.accent 样式，且直接把背景打到模板部件
+         ContentPresenter#PART_ContentPresenter 上（蓝色 #0078D4），会压过上面设的
+         Button.Background（TemplateBinding 打不过模板级样式）。这里在窗口级以同样
+         目标覆盖回青绿渐变——窗口样式晚于应用样式，后者必被本条盖掉。 -->
+    <Style Selector="Button.accent /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background">
+        <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+          <GradientStop Color="#14997A" Offset="0"/>
+          <GradientStop Color="#0C5D49" Offset="1"/>
+        </LinearGradientBrush>
+      </Setter>
+    </Style>
+    <!-- ⚠️ 必须排在上面 base 覆盖之后：Avalonia 同属性后写者胜，
+         否则 base 的青绿渐变会把 :disabled 的置灰背景盖掉（CanSend=false 时不发灰）。 -->
+    <Style Selector="Button.accent:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#C9C7BE"/>
+    </Style>
+
+    <!-- ============ 危险按钮：柔和红 + 悬停加深 ============ -->
+    <Style Selector="Button.danger">
+      <Setter Property="Background" Value="#FCEBEB"/>
+      <Setter Property="Foreground" Value="#A32D2D"/>
+      <Setter Property="BorderBrush" Value="#F5C6C6"/>
+      <Setter Property="BorderThickness" Value="0.5"/>
+      <Setter Property="CornerRadius" Value="9"/>
+      <Setter Property="FontWeight" Value="Medium"/>
+      <Setter Property="Padding" Value="16,9"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.15"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Button.danger:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#F9DBDB"/>
+    </Style>
+    <Style Selector="Button.danger:pressed /template/ ContentPresenter">
+      <Setter Property="Background" Value="#F5CBCB"/>
+    </Style>
+
+    <!-- ============ 快捷指令 chip ============ -->
+    <Style Selector="Button.chip">
+      <Setter Property="Padding" Value="14,7"/>
+      <Setter Property="CornerRadius" Value="999"/>
+      <Setter Property="FontSize" Value="12.5"/>
+      <Setter Property="Background" Value="White"/>
+      <Setter Property="BorderBrush" Value="#DCDACF"/>
+      <Setter Property="BorderThickness" Value="0.5"/>
+      <Setter Property="Foreground" Value="#5F5E5A"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.15"/>
+          <BrushTransition Property="BorderBrush" Duration="0:0:0.15"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Button.chip:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#EAF6F1"/>
+      <Setter Property="BorderBrush" Value="#9FD3C0"/>
+    </Style>
+    <Style Selector="Button.chip:pointerover">
+      <Setter Property="Foreground" Value="#0C5D49"/>
+    </Style>
+
+    <!-- ============ 通用卡片 ============ -->
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="White"/>
+      <Setter Property="CornerRadius" Value="12"/>
+      <Setter Property="BoxShadow" Value="0 1 4 0 #14000000"/>
+    </Style>
+
+    <!-- ============ 录制点呼吸动画 ============ -->
+    <Style Selector="Ellipse.recPulse">
+      <Style.Animations>
+        <Animation Duration="0:0:1.4" IterationCount="Infinite" PlaybackDirection="Normal">
+          <KeyFrame Cue="0%">
+            <Setter Property="Opacity" Value="1"/>
+          </KeyFrame>
+          <KeyFrame Cue="50%">
+            <Setter Property="Opacity" Value="0.25"/>
+          </KeyFrame>
+          <KeyFrame Cue="100%">
+            <Setter Property="Opacity" Value="1"/>
+          </KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+  </Window.Styles>
+
+  <Grid ColumnDefinitions="184,*">
+    <!-- ============ 侧边导航 ============ -->
+    <Border Grid.Column="0" Background="White" BorderBrush="#E8E8E4" BorderThickness="0,0,0.5,0">
+      <DockPanel Margin="14,18,14,14">
+        <StackPanel DockPanel.Dock="Top" Spacing="2">
+          <!-- 品牌区：渐变圆角方块 + 麦克风图标 -->
+          <StackPanel Orientation="Horizontal" Spacing="10" Margin="2,0,0,20">
+            <Border Width="34" Height="34" CornerRadius="10" VerticalAlignment="Center">
+              <Border.Background>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                  <GradientStop Color="#17A183" Offset="0"/>
+                  <GradientStop Color="#0B5745" Offset="1"/>
+                </LinearGradientBrush>
+              </Border.Background>
+              <PathIcon Width="17" Height="17" Foreground="White"
+                        Data="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3Zm5-6v3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2Z"/>
+            </Border>
+            <StackPanel VerticalAlignment="Center" Spacing="1">
+              <TextBlock Text="白泽 BaiZe" FontSize="14" FontWeight="SemiBold" Foreground="#2A2A26"/>
+              <TextBlock Text="语音工作助手" FontSize="10.5" Foreground="#9A988E"/>
+            </StackPanel>
+          </StackPanel>
+
+          <TextBlock Text="工作台" FontSize="10.5" Foreground="#B0AEA3" Margin="6,0,0,6"/>
+          <Button Classes="navBtn" Classes.active="{Binding IsChatActive}"
+                  Command="{Binding ShowChatCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="9">
+              <PathIcon Width="15" Height="15"
+                        Data="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2Z"/>
+              <TextBlock Text="对话"/>
+            </StackPanel>
+          </Button>
+          <Button Classes="navBtn" Classes.active="{Binding IsMeetingActive}"
+                  Command="{Binding ShowMeetingCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="9">
+              <PathIcon Width="15" Height="15"
+                        Data="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3Zm5-6v3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2Z"/>
+              <TextBlock Text="会议"/>
+            </StackPanel>
+          </Button>
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Spacing="3" Margin="6,0,0,0">
+          <Separator Background="#ECEAE2" Height="0.5" Margin="0,0,0,8"/>
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Ellipse Width="6" Height="6" Fill="#97C459" VerticalAlignment="Center"/>
+            <TextBlock Text="FunASR 本地服务" FontSize="11" Foreground="#888780"/>
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <Ellipse Width="6" Height="6" Fill="#D9B44A" VerticalAlignment="Center"/>
+            <TextBlock Text="LLM 待接入" FontSize="11" Foreground="#888780"/>
+          </StackPanel>
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <ContentControl Grid.Column="1" Content="{Binding CurrentPage}">
+      <ContentControl.DataTemplates>
+        <DataTemplate DataType="vm:ChatViewModel">
+          <views:ChatView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:MeetingViewModel">
+          <views:MeetingView/>
+        </DataTemplate>
+      </ContentControl.DataTemplates>
+    </ContentControl>
+  </Grid>
+</Window>

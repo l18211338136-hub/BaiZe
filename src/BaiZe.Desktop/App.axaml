@@ -1,0 +1,9 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="BaiZe.Desktop.App">
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+
+    <!-- 托盘在 App.axaml.cs 里用代码构建（XAML 声明 TrayIcon 会在 XamlIlPopulate 时 NRE） -->
+</Application>

@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 共享契约层（零依赖）：领域事件标记 IDomainEvent 归在此层，Domain 事件实现它。 -->
+    <ProjectReference Include="..\BaiZe.Contracts\BaiZe.Contracts.csproj" />
+  </ItemGroup>
+</Project>

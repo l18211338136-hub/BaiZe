@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- 首版不编译进解决方案：需要时再 `dotnet sln add` 本项目并启用 AddInfrastructure() -->
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BaiZe.Application\BaiZe.Application.csproj" />
+  </ItemGroup>
+</Project>

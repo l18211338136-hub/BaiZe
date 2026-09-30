@@ -1,0 +1,21 @@
+# BaiZe embedded FunASR server dependencies (auto-installed into isolated venv on first run)
+funasr>=1.1
+numpy
+websockets>=12
+torch
+torchaudio
+
+# 重叠语音分离（两人同时说话 / 抢话）用。只需 onnxruntime，模型本身是 86.7MB 的量化 ONNX。
+# ⚠️ 必须是 gpu 版：实测纯 CPU 的 RTF 是 3.34（一句 6 秒要跑 20 秒，定稿会严重卡顿），
+#    CUDA 下 RTF 0.52 才可用。
+# ⚠️ 只装 onnxruntime-gpu 是不够的！实测它**不会**自动安装 CUDA 运行时依赖，
+#    结果是 providers 里只剩 CPUExecutionProvider，加载时报
+#    "Error loading onnxruntime_providers_cuda.dll which depends on cublasLt64_12.dll"。
+#    必须像下面这样把 nvidia-* 显式列出来（合计约 1.5GB），CUDAExecutionProvider 才可用。
+onnxruntime-gpu
+nvidia-cublas-cu12
+nvidia-cuda-runtime-cu12
+nvidia-cudnn-cu12
+nvidia-cufft-cu12
+nvidia-curand-cu12
+nvidia-cuda-nvrtc-cu12

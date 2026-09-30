@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/App/">
+    <Project Path="src/BaiZe.Application/BaiZe.Application.csproj" />
+    <Project Path="src/BaiZe.Desktop/BaiZe.Desktop.csproj" />
+    <Project Path="src/BaiZe.Domain/BaiZe.Domain.csproj" />
+    <Project Path="src/BaiZe.Infrastructure/BaiZe.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Framework/">
+    <Project Path="src/BaiZe.Mediator/BaiZe.Mediator.csproj" />
+  </Folder>
+  <Folder Name="/src/Shared/">
+    <Project Path="src/BaiZe.Contracts/BaiZe.Contracts.csproj" />
+  </Folder>
+</Solution>

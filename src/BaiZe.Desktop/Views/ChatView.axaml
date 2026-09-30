@@ -1,0 +1,220 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:BaiZe.Desktop.ViewModels"
+             x:Class="BaiZe.Desktop.Views.ChatView"
+             x:DataType="vm:ChatViewModel">
+  <UserControl.Styles>
+    <!-- FluentTheme 会给聚焦 TextBox 的模板部件画 2px 蓝色边框，这里在控件级覆盖为柔和青绿细边 -->
+    <Style Selector="TextBox.commandInput /template/ Border#PART_Border">
+      <Setter Property="BorderBrush" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="TextBox.commandInput:pointerover /template/ Border#PART_Border">
+      <Setter Property="BorderBrush" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+    <Style Selector="TextBox.commandInput:focus /template/ Border#PART_Border">
+      <Setter Property="BorderBrush" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+
+    <!-- ============ 输入卡片：静息/聚焦两态（聚焦 = 青绿描边 + 光圈投影） ============ -->
+    <!-- 注意：BorderBrush/Thickness/BoxShadow 必须走样式而非局部属性，否则聚焦态 setter 压不过本地值 -->
+    <Style Selector="Border#InputCard">
+      <Setter Property="BorderBrush" Value="#EDECE4"/>
+      <Setter Property="BorderThickness" Value="0.5"/>
+      <Setter Property="BoxShadow" Value="0 2 12 0 #1A0F5D40"/>
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="BorderBrush" Duration="0:0:0.18"/>
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Border#InputCard.inputFocused">
+      <Setter Property="BorderBrush" Value="#8FCDBA"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="BoxShadow" Value="0 4 18 0 #26127A5E"/>
+    </Style>
+
+    <!-- ============ 麦克风幽灵钮：语音输入待接入，外观恒定不随悬停变化 ============ -->
+    <Style Selector="Button.micGhost">
+      <Setter Property="Background" Value="#F2F9F6"/>
+      <Setter Property="BorderBrush" Value="#DCEDE5"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+    <Style Selector="Button.micGhost /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#F2F9F6"/>
+    </Style>
+    <Style Selector="Button.micGhost:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#EDF7F2"/>
+      <Setter Property="BorderBrush" Value="#CBE4D9"/>
+    </Style>
+    <Style Selector="Button.micGhost:pressed /template/ ContentPresenter">
+      <Setter Property="Background" Value="#EDF7F2"/>
+    </Style>
+
+    <!-- 语音输入进行中：柔红底 + 红描边（与"待接入"的青绿态区分） -->
+    <Style Selector="Button.micGhost.listening">
+      <Setter Property="Background" Value="#FDECEA"/>
+      <Setter Property="BorderBrush" Value="#EFBEB9"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+    <Style Selector="Button.micGhost.listening /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#FDECEA"/>
+    </Style>
+    <Style Selector="Button.micGhost.listening:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#FBE3E0"/>
+      <Setter Property="BorderBrush" Value="#E8A9A3"/>
+    </Style>
+  </UserControl.Styles>
+  <Grid RowDefinitions="*,Auto">
+    <ScrollViewer x:Name="Scroll" Grid.Row="0" HorizontalScrollBarVisibility="Disabled">
+      <ItemsControl ItemsSource="{Binding Messages}" Margin="20,16,20,6">
+        <ItemsControl.DataTemplates>
+          <!-- 用户消息：右侧渐变气泡 -->
+          <DataTemplate DataType="vm:UserMsg">
+            <Border MaxWidth="440" HorizontalAlignment="Right" Margin="0,5,0,5">
+              <Border.Background>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                  <GradientStop Color="#DFF3EC" Offset="0"/>
+                  <GradientStop Color="#CDEBDF" Offset="1"/>
+                </LinearGradientBrush>
+              </Border.Background>
+              <Border CornerRadius="14" Padding="13,9">
+                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="13.5"
+                           Foreground="#085041" LineHeight="21"/>
+              </Border>
+            </Border>
+          </DataTemplate>
+
+          <!-- 助手消息：左侧头像 + 白色气泡 -->
+          <DataTemplate DataType="vm:AssistantMsg">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,5" MaxWidth="520">
+              <Border Width="32" Height="32" CornerRadius="16" VerticalAlignment="Top">
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                    <GradientStop Color="#17A183" Offset="0"/>
+                    <GradientStop Color="#0B5745" Offset="1"/>
+                  </LinearGradientBrush>
+                </Border.Background>
+                <TextBlock Text="泽" FontSize="13" FontWeight="SemiBold" Foreground="White"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              </Border>
+              <Border Background="White" CornerRadius="4,14,14,14" Padding="13,9" Margin="11,0,0,0"
+                      MaxWidth="440" VerticalAlignment="Top" BoxShadow="0 1 3 0 #10000000">
+                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="13.5"
+                           Foreground="#33332E" LineHeight="21"/>
+              </Border>
+            </StackPanel>
+          </DataTemplate>
+
+          <!-- 工具执行卡片：左侧强调边 + 徽标 -->
+          <DataTemplate DataType="vm:ToolMsg">
+            <Border Background="White" CornerRadius="4,12,12,12" MaxWidth="480"
+                    HorizontalAlignment="Left" Margin="43,5,0,5" BoxShadow="0 1 4 0 #12000000">
+              <Border BorderBrush="{Binding BadgeBackground}" BorderThickness="3,0,0,0"
+                      CornerRadius="0,12,12,0">
+                <StackPanel Margin="12,9,12,9">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold" Foreground="#2A2A26"/>
+                    <Border CornerRadius="999" Padding="9,1.5" Background="{Binding BadgeBackground}"
+                            VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Badge}" FontSize="10.5" Foreground="{Binding BadgeForeground}"
+                                 FontWeight="Medium"/>
+                    </Border>
+                  </StackPanel>
+                  <Border Background="#F6F5F1" CornerRadius="6" Padding="8,5" Margin="0,6,0,0"
+                          IsVisible="{Binding HasParams}">
+                    <TextBlock Text="{Binding Params}" FontSize="11.5" FontFamily="Consolas"
+                               TextWrapping="Wrap" Foreground="#5F5E5A"/>
+                  </Border>
+                  <TextBlock Text="{Binding Detail}" FontSize="12" TextWrapping="Wrap"
+                             Margin="0,5,0,0" Foreground="#888780" LineHeight="18"
+                             IsVisible="{Binding Detail}"/>
+                </StackPanel>
+              </Border>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.DataTemplates>
+      </ItemsControl>
+    </ScrollViewer>
+
+    <!-- ============ 输入区 ============ -->
+    <StackPanel Grid.Row="1" Margin="20,6,20,16" Spacing="10">
+      <!-- 语音输入中：脉动红点 + 流式文字；停止后整条隐藏 -->
+      <Border IsVisible="{Binding IsListening}" Background="#FDF1EF" BorderBrush="#F5DAD5"
+              BorderThickness="0.5" CornerRadius="9" Padding="11,6" HorizontalAlignment="Left">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Ellipse Width="7" Height="7" Fill="#D9534F" Classes="recPulse" VerticalAlignment="Center"/>
+          <TextBlock Text="{Binding VoiceHint}" FontSize="12" Foreground="#8A4B45"
+                     VerticalAlignment="Center" MaxWidth="520" TextTrimming="CharacterEllipsis"/>
+          <TextBlock Text="·点麦克风停止" FontSize="11" Foreground="#B08A85"
+                     VerticalAlignment="Center"/>
+        </StackPanel>
+      </Border>
+
+      <StackPanel Orientation="Horizontal" Spacing="9">
+        <Button Classes="chip" Command="{Binding UseQuickCommand}" CommandParameter="打开微信">
+          <StackPanel Orientation="Horizontal" Spacing="7">
+            <Ellipse Width="6" Height="6" Fill="#17A183" VerticalAlignment="Center"/>
+            <TextBlock Text="打开应用" VerticalAlignment="Center"/>
+          </StackPanel>
+        </Button>
+        <Button Classes="chip" Command="{Binding UseQuickCommand}" CommandParameter="查一下本月报表">
+          <StackPanel Orientation="Horizontal" Spacing="7">
+            <Ellipse Width="6" Height="6" Fill="#97C459" VerticalAlignment="Center"/>
+            <TextBlock Text="查报表" VerticalAlignment="Center"/>
+          </StackPanel>
+        </Button>
+        <Button Classes="chip" Command="{Binding UseQuickCommand}" CommandParameter="帮我订机票">
+          <StackPanel Orientation="Horizontal" Spacing="7">
+            <Ellipse Width="6" Height="6" Fill="#D9B44A" VerticalAlignment="Center"/>
+            <TextBlock Text="订机票" VerticalAlignment="Center"/>
+          </StackPanel>
+        </Button>
+      </StackPanel>
+
+      <Border x:Name="InputCard" Classes="card" Padding="10,9,10,9" CornerRadius="16">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Button Grid.Column="0" Classes="micGhost" Classes.listening="{Binding IsListening}"
+                  Width="42" Height="42" CornerRadius="21" Padding="0"
+                  VerticalAlignment="Center" Command="{Binding ToggleVoiceCommand}"
+                  ToolTip.Tip="语音输入：点击开始说话，再点一次停止（识别结果会填入输入框）">
+            <Panel>
+              <!-- 待机：柔和青绿麦克风 -->
+              <PathIcon Width="19" Height="19" Foreground="#5FA892"
+                        IsVisible="{Binding !IsListening}"
+                        Data="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3Zm5-6v3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2Z"/>
+              <!-- 聆听中：红色麦克风，明确"正在收音" -->
+              <PathIcon Width="19" Height="19" Foreground="#C0392B"
+                        IsVisible="{Binding IsListening}"
+                        Data="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3Zm5-6v3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2Z"/>
+            </Panel>
+          </Button>
+          <TextBox x:Name="InputBox" Grid.Column="1" Text="{Binding InputText}" Margin="12,0,12,0"
+                   MinHeight="44" VerticalContentAlignment="Center"
+                   Classes="commandInput"
+                   Background="Transparent" BorderThickness="0" FontSize="14.5"
+                   GotFocus="OnInputFocusChanged" LostFocus="OnInputFocusChanged"
+                   Watermark="输入指令，例如：打开微信 / 查一下本月报表">
+            <!-- 覆写 Fluent TextBox 的聚焦边框资源：边框交给外层卡片光圈，输入框自身全透明 -->
+            <TextBox.Resources>
+              <Thickness x:Key="TextControlBorderThemeThickness">0</Thickness>
+              <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
+              <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent"/>
+              <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent"/>
+              <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
+              <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#ADBAB2"/>
+            </TextBox.Resources>
+            <TextBox.KeyBindings>
+              <KeyBinding Gesture="Enter" Command="{Binding SendCommand}"/>
+            </TextBox.KeyBindings>
+          </TextBox>
+          <Button Grid.Column="2" Classes="accent" Content="发送" Padding="22,0" Height="42"
+                  CornerRadius="12" VerticalAlignment="Center"
+                  Command="{Binding SendCommand}"/>
+        </Grid>
+      </Border>
+    </StackPanel>
+  </Grid>
+</UserControl>

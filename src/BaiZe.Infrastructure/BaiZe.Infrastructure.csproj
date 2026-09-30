@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.12" />
+    <!-- 配置绑定：FunAsrOptions 从 appsettings.json 的 FunAsr 节绑定（Get<T>() 扩展） -->
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.12" />
+    <PackageReference Include="PortAudioSharp2" Version="1.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BaiZe.Application\BaiZe.Application.csproj" />
+    <ProjectReference Include="..\BaiZe.Contracts\BaiZe.Contracts.csproj" />
+  </ItemGroup>
+
+  <!-- 内嵌 Python 语音识别服务：随构建拷到输出目录，FunAsrServerHost 启动时执行。
+       注意：只匹配 py/txt，避免 Windows 大小写不敏感把 C# 的 FunAsr\ 源码目录也拷进去 -->
+  <ItemGroup>
+    <None Include="funasr\*.py;funasr\*.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
